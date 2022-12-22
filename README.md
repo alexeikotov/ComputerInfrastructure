@@ -1,207 +1,158 @@
-# 1 - Dependencies management
+# 2 - Working with remote servers
 
-***git branch name:*** dependencies
+**git branch name:** jbrowser
 
 ## Theory [2]
 
-As usual, we will start with a few theoretical questions:
+* [0.4] What are computer ports on a high level? How many ports are there on a typical computer?
 
-* [0.5] What is Docker, and how it differs from dependencies management systems? From virtual machines?
+Порт  — это способ использования одного физического сетевого соединения для обработки входящих и исходящих запросов, назначая каждому номер порта и является 16-битным числом. Порты основаны на программном обеспечении и управляются операционной системой компьютера. Некоторые из этих номеров имеют специальное назначение и связаны с определенными типами процессов или служб, например порт 21 связан с передачей FTP файлов, а HTTP всегда имеет порт 80. Это позволяет компьютерам различать разные виды трафика. Посколько виртуальные порты - это 16-битное число, то существует 65535. Порты от 0 до 1023 называются общеизвестными, с 2024 по 49151 - зарегистрированные (или пользовательские) и порты с 49152 по 65535 - динамические (или частные). Интересный пример из интернета: порт - это как добавочный номер компании, а IP как основной номер телефона. По IP можно связаться с нужной компанией (компьютером), а добавочный номер уже соединит с нужным человеком (службой на компьютере). Набор добавочного номера 0 зачастую соединяет с оператором, что аналогично общеизвестным портам, которые всегда обозначают определенные службы.
 
-Docker — это программная платформа, позволяющая быстро создавать, тестировать и развертывать приложения. Docker упаковывает программное обеспечение в стандартизированные блоки внутри одной операционной системы, называемые контейнерами, которые содержат все необходимое для работы программного обеспечения, включая библиотеки, системные инструменты, код и среду выполнения. 
-При этом системы управления зависимостями - по сути управляют наборами программ и с их зависимостями внутри системы. При этом контейнер докера - это изолированная система со своими зависимостями и окружением, отделенное от других приложений и ОС.
-Виртуальная машина это по сути программная или аппаратна система, которая эмулирует работу "витруальной" версии компьютера с выделенными ему ресурсами ЦП, памяти и тд.   То етсь виртальная машина реализует виртуализацию на уровне железа, а докер на уровне ОС. В отличае от докера виртуальные машины менее гибкие, каждая ВМ имеет свою ОС. Плюс контейнер может быть легко перенесен на другую машину. Docker потребляют меньше ресурсов, быстрее развёртываются, проще масштабируются и меньше весят.
+* [0.4] What is the difference between http, https, ssh, and other protocols? In what sense are they similar? Name default ports for several data transfer protocols.
 
-* [0.5] What are the advantages and disadvantages of using containers over other approaches?
+По своей сути протоколы - это свод правил и инструкций взаимодействия между компютером и сервером/другим компьютером. HTTP (Hyper Text Transfer Protocol) протокол изначально использовался для передачи текста, но сейчас используется и для других задач. Особенностью HTTP является типизация и согласование представления данных, что позволяет системам строиться независимо от передаваемых данных. Задача, которая традиционно решается с помощью протокола HTTP — обмен данными между пользовательским приложением, осуществляющим доступ к веб-ресурсам (обычно это веб-браузер) и веб-сервером. Как правило, передача данных по протоколу HTTP осуществляется через TCP/IP-соединения. HTTPS означает безопасный протокол передачи гипертекста через TLS или SSL. HTTPS шифрует данные открытым ключом, а затем получатель расшифровывает его. Открытый ключ лежит на сервере и входит в SSL-сертификат. В случае HTTP - не нужны SSL-сертификаты. Кроме защищенности, HTTP и HTTPS используют разные порты, 80 и 443, соответственно. SSH - это «Безопасная оболочка». Чтобы установить соединение, он имеет встроенный процесс аутентификации имени пользователя и пароля. Для подключения этого процесса аутентификации используется порт 22. В отличии от HTTPS: 1) SSH использует процесс аутентификации по имени / паролю для установления безопасного соединения; 2) SSH основан на туннелировании сети; 3) С технической точки зрения, SSH предназначен для защиты компьютерных сетей и связи между двумя компьютерами через Интернет, в то время как HTTPS - для защиты онлайн-передачи данных и шифрования связи между браузером и сервером. Существуют и другие протоколы, которые отличаются портами: POP3 - 110. SMTP - 25, FTP - 21, TFTP - 69 и др.
 
-Частично я ответил в прошлом вопросе. Но если кратко, то к преимуществам докер-контейнеров относится: быстрая скорость работы, доступность, быстрота развертывания, меньшие ресурсозатраты, позволяет работать с разными файловыми системами.
-К недостаткам можно отнести: безопасность, необходимость работать на системе, на которой создан, сложность удаления, часто необходима тонкая настройка
+* [0.4] Explain briefly: (1) what is IP, (2) what IPs are called 'white'/public, (3) and what happens when you enter 'google.com' into the web browser.
 
-* [0.5] Explain how Docker works: what are Dockerfiles, how are containers created, and how are they run and destroyed?
+(1) В общем смысле IP - это уникальный 32-битный идентификатор (адрес) устройства в сети интернет или локальной сети из 4 чисел от 0 до 255, разделенных точкой. (2) Если задуматься, то в мире устройств гораздо больше, чем можно сгененрировать IP адресов. Соотвественно, это решается тем, что есть глобальный интернет и локальная сеть (домашняя, областная, университетская и тд.) Соответственно, на входе в локальную сеть стоит маршрутизатор, который является шлюзом и одновременно находится во внешней сети и в локальной. Так вот белый IP - это тот адрес под которым устройства из локальной сети работают в глобальной сети. При этом серый адрес определяется маршрутизатором для устройств внутри локальной сети. По этому адресу устройство будет доступно внутри сети, но из Интернета устройство не будет видно. (3) Сначала браузер будет пытаться понять к какому IP-адресу сервера относится введенный сайт. Сначала будет проверена история подключений, кеш роутера, оперционной системы (ОС), кеш провайдера и далее по цепочке, пока не найдется адрес, после чего он запишется во все кеши и браузер продолжит. Далее нужно определиться с протоколом запроса, так как мы его не указали. Для этого будет проврка наличия указанного домена в списке HTTP Strict Transport Security, далее когда там найдется google.com браузер отправит ему запрос по https. Браузер и сервер создадут защищенное соединение. Для этого браузер создаст запрос на наличие SSL-сертификата, далее он получит публичный ключ, далее запрос в центр сертификации. Если информация подтверждается, генерируется сеансовый ключ, зашифровывается публичным ключом и отправляется на сервер. Сервер расшифровывает сообщение с помощью приватного ключа и сохраняет сеансовый ключ. Таким образом для общения далее будет использоваться сеансовый ключ. Далее во время общения нужно надежно упаковать пакеты с данными, чтобы ничего не потерялось. Для этого есть протокол нижележащего уровня - TCP. ОС, получив сообщение от браузера, инкапсулирует его в пакеты нижележащего уровня. Надежность доставки пакетов протокол TCP обеспечивает посредством их нумерации, контроля правильного порядка пакетов и подтверждения их передачи. На сетевом уровне, TCP пакет упаковывается в IP пакет и такие пакеты перемещаются из одной сети к другой, пока не достигнут получателя. По достижении сервера пакет распоковывается в обратном порядке. Далее сервер прочитав его формирует ответ, запаковывает его и отправляет обратно. Получив ответ, браузер распаковывает его, парсит и показывает нам то, что мы запросили.
 
-Работа докера происходит на уровне ОС - докер хоста. При этом докер создает образ (image) поверх файловой системы в который можно установить программы, конфигурации и необходимые фаловые зависимости. Управление формированием образа происходит с помощью докерфайла, который является инструкцией для сборки образа. В результате появляется контейнер, который по сути является результатом выполнения образа. Внутри данного контейнера могут быть получены, отредактированы и записаны данные, которые при необходимости можно извлечь с помощью volumes. После удаления контейнера данные сотрутся. 
-СОздание контейнера поисходит с помощью команды docker build, которая принимает на вход dockerfile, внутри которого написано что будет рецепт поэтапного создания образа. После чего, можно запустить образ командой docker run --rm -it dockerfilehw:latest bash для работы внутри контейнера.
+* [0.4] What is Nginx? How does it work on the high level? List several alternative web servers.
 
-* [0.25] Name and describe at least one Docker competitor (i.e., a tool based on the same containerization technology).
+NGINX — это программное обеспечение с открытым исходным кодом, которое используется в качестве веб-сервера, а также используется в качестве обратного прокси-сервера, кэша HTTP и балансировщика нагрузки. Nginx разбивает каждый запрос пользователя на несколько мелких, упрощая таким образом обработку каждого. После обработки каждое соединение собирается в одном виртуальном контейнере, чтобы трансформироваться в единый первоначальный запрос, а после отправляется пользователю. Одно соединение может одновременно обрабатывать до 1024 запросов конечного пользователя. Для уменьшения нагрузки на оперативную память веб-сервер использует выделенный сегмент памяти, который называется «пул» (pool). Он динамический и расширяется при увеличении длины запроса. В качестве альтернативы приводятся pound, ha proxy, websockets, yaws
 
-Kaniko - альтернатива докера которая используется в создании образов контейнеров внутри Kubernetes от Google. Kaniko может делать образы из Docker-файлов и не зависеть от докера. Основное различие с Docker в ориентированность на рабочие процессы Kubernetes. 
 
-* [0.25] What is conda? How it differs from apt, yarn, and others?
+* [0.4] What is SSH, and for what is it typically used? Explain two ways to authenticate in an SSH server in detail.
 
-Conda — это система управления зависимостями. Conda может работать локально и независимо для каждого пользователя и включает в себя библиотеку установленных пакетов conda. Например, у вас может быть одна среда с NumPy 1.7 и ее зависимостями, а другая среда с NumPy 1.6 для устаревшего тестирования. В отличие от язык-специфичных библиотек, conda не ограничена яхыком. Так, если пакеты Pip — это NumPy или matplotlib, то пакеты Conda включают библиотеки Python (NumPy или matplotlib), библиотеки C (libjpeg) и исполняемые файлы (например, компиляторы C и даже сам интерпретатор Python). Более того, conda в отличии от других менеджеров, таких как apt предоставляет расширенный функционал для работы с окружениями.
+SSH - это протокол прикладного уровня, который позволяет управлять сервером через интернет, а именно передачи данных через защищенное соединения, удаленного запуска программ, выполнения команд через командную строку, переадресации портов и тд. Есть два типа аутентификации. (1) Аутентификация по паролю. Требует фактического идентификатора пользователя и пароля от хоста, на котором находится сервер SSH. При аутентификации на основе пароля после установления безопасного соединения с удаленными серверами пользователи SSH обычно передают свои имена пользователей и пароли удаленным серверам для аутентификации клиентов. Эти учетные данные передаются через безопасный туннель, установленный с помощью симметричного шифрования. Сервер проверяет эти учетные данные в базе данных и, если они найдены, аутентифицирует клиента и разрешает ему общаться. (2) Аутентификация на основе открытого ключа. При аутентификации на основе открытого ключа после того, как клиент устанавливает соединение с удаленным сервером, клиент сообщает серверу пару ключей, с помощью которой он хотел бы пройти аутентификацию. Сервер проверяет наличие этой пары ключей в своей базе данных, а затем отправляет зашифрованное сообщение клиенту. Клиент расшифровывает сообщение своим закрытым ключом и генерирует хеш-значение, которое отправляется обратно на сервер для проверки. Сервер генерирует собственное хэш-значение и сравнивает его с отправленным клиентом. Когда оба хеш-значения совпадают, сервер убеждается в подлинности клиента и позволяет ему взаимодействовать с сервером.
 
 ## Problem [6.5]
 
-The problem itself is relatively simple. 
+A real-life situation that occurred to me several times over the years.
 
-Imagine that you developed an excellent RNA-seq analysis pipeline and want to share it with the world. Based on your experience, you are confident that the popularity of the pipeline will be proportional to its ease of use. So, you decided to help your future users and to pack all dependencies in a Conda environment and a Docker container.
+Imagine wrapping up a large bioinformatics project and wanting to share raw data with your colleagues in a friendly and straightforward format. The best option would be to use an online genome browser and host your data remotely, so it is easily accessible by anyone with a valid link. This is exactly what we will be doing here.
 
-Here is the list of tools and their versions that are used in your work:
-* [fastqc](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), v0.11.9
-* [STAR](https://github.com/alexdobin/STAR), v2.7.10b
-* [samtools](https://github.com/samtools/samtools), v1.16.1
-* [picard](https://github.com/broadinstitute/picard), v2.27.5
-* [salmon](https://github.com/COMBINE-lab/salmon), commit tag 1.9.0
-* [bedtools](https://github.com/arq5x/bedtools2), v2.30.0
-* [multiqc](https://github.com/ewels/MultiQC), v1.13
+*Please consider doing this HW using Linux since setting up the SSH client on Windows is painful, and I won't be able to help you.*
 
-### Anaconda
+**Remote Server**:
+* [2] Create a new virtual machine in the Yandex/Mail/etc cloud (order at least 10GB of free disk space). Generate SSH key pair and use it to connect to your server.
 
-* [1] Install conda, create a new virtual environment, and install all necessary packages.
+Создал виртуальную машину
+kotov_alexei@hw2machine:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           393M  1.2M  392M   1% /run
+/dev/vda2        15G  3.1G   11G  22% /
+tmpfs           2.0G     0  2.0G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs           393M  4.0K  393M   1% /run/user/1000
 
-Установил Анаконду:
-bash Anaconda3-2022.10-Linux-x86_64.sh
+Адрес: 130.193.43.200
 
-Создание окружения:
-conda create --name hw_env
-conda activate hw_env
+* [1] Download the latest human genome assembly (GRCh38) from the Ensemble FTP server ([fasta](https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz), [GFF3](https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz)). Index the fasta using samtools (`samtools faidx`) and GFF3 using tabix. 
 
-Добавил каналы:
-conda config --add channels bioconda
-conda config --add channels conda-forge
+# Загружаем геном
+wget https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
-Установка пакетов в окружение:
-conda install -c bioconda fastqc==0.11.9
-conda install -c bioconda samtools==1.16.1
-conda install -c bioconda star
-conda install -c bioconda picard==2.27.5
-не нашелся
-conda install -c bioconda picard==2.27.4
-conda install -c bioconda salmon==1.9.0
-conda install -c bioconda bedtools==2.30.0
-conda install -c bioconda multiqc==1.13
-долго искал, сделал по-другому
-conda install -c "bioconda/label/cf201901" multiqc\
+# Загружаем аннотацию
+wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
 
-* [0.75] You won't be able to install some tools - that's fine. List their names, and explain what should be done to make them conda-friendly ([conda-forge](https://conda-forge.org/docs/maintainer/adding_pkgs.html) channel, [bioconda](https://bioconda.github.io/contributor/workflow.html) channel).
+# Индексируем геном
+sudo apt-get install samtools
+gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+samtools faidx Homo_sapiens.GRCh38.dna.primary_assembly.fa
 
-Все пакеты (кроме одного) установились нормально. Сразу добавил каналы, где нужно искать заданные программы
-conda config --add channels bioconda
-conda config --add channels conda-forge # на случай если не будет в биоконде
+# Индексируем аннотацию
+sudo apt-get install tabix
+gzip -d Homo_sapiens.GRCh38.108.gff3.gz
+(grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > Homo_sapiens.GRCh38.108.sorted.gff3.gz
+tabix -p gff Homo_sapiens.GRCh38.108.sorted.gff3.gz
 
-Не удалось установить picard==2.27.5,
-conda install -c bioconda picard==2.27.5
 
-Он есть на гитхабе, но его нет в конде (по крайней мере в bioconda, conda-forge). Можно установить последнюю версию вручную. Но я просто поставил picard==2.27.4
- 
-* [0.25] [Export](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#exporting-the-environment-yml-file) the environment ([example](https://github.com/nf-core/clipseq/blob/master/environment.yml)) to the file and verify that it can be [rebuilt](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) from the file without problems.
+* [1] Select and download BED files for three ChIP-seq and one ATAC-seq experiment from the ENCODE (use one tissue/cell line). Sort, bgzip, and index them using tabix.
 
-Проверяем все ли работает:
+#Брал в качестве линии K562
+#bigBed narrowPeak for CHIP-seq SMAD3 in K562
+wget -O SMAD3.bed.gz "https://www.encodeproject.org/files/ENCFF335ZTU/@@download/ENCFF335ZTU.bed.gz"
+#bigBed narrowPeak for CHIP-seq MLX in K562
+wget -O MLX.bed.gz "https://www.encodeproject.org/files/ENCFF682SSQ/@@download/ENCFF682SSQ.bed.gz"
+#bigBed narrowPeak for CHIP-seq TGIF2 in K562
+wget -O TGIF2.bed.gz "https://www.encodeproject.org/files/ENCFF336YLK/@@download/ENCFF336YLK.bed.gz"
+#bigBed narrowPeak for CHIP-seq ATACseq in K562
+wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz"
 
-1.$conda env list
+# Распаковываем и сортируем
+gzip -d *bed.gz
+for i in *.bed; do sort -k 1,1 -k2,2n $i > $(echo $i| cut -d '.' -f 1)'_sorted.bed'; done
 
-conda environments:
-base * /home/alexei/anaconda3
-hw_env /home/alexei/anaconda3/envs/hw_env
+# впоследствии обнаружил, что названия хромосом в gff и bed отличаются, поэтому переименовал в bed хромосомы (например, из chr10 в 10)
+# иначе они не будут отображаться в браузере
+for i in *.sorted.bed; do awk '{gsub(/^chr/,""); print}' $i > $(echo $i| cut -d '.' -f 1)'_renamed.bed'; done
 
-conda env remove --name hw_env
-conda env create -f hw_env.yml
-conda activate hw_env # все работает
+# затем запаковал и индексировал
+for i in *sorted_renamed.bed; do bgzip -c $i > $i'.gz'; done
+for i in *sorted_renamed.bed.gz; do tabix -p bed $i; done
 
-### Docker
-* [3] Create a Dockerfile for a container with **all** required dependencies. Don't forget about comments; test that all tools are accessible and work inside the container. Hints:
- - If needed, grant rights to execute downloaded/compiled binaries using chmod (`chmod a+x BINARY_NAME`)
- - Move all executables to $PATH folders (e.g.`/usr/local/bin`) to make them accessible without specifying the full path.
- - Typical command to run a container interactively (`-it`) and delete on exit(`--rm`): `docker run --rm -it name:tag`
- 
-Ставим докер:
-ставил как описано здесь https://docs.docker.com/engine/install/ubuntu/
+**JBrowse 2**
+* [1] Download and install [JBrowse 2](https://jbrowse.org/jb2/). Create a new jbrowse [repository](https://jbrowse.org/jb2/docs/cli/#jbrowse-create-localpath) in `/mnt/JBrowse/` (or some other folder).
 
-Создаем dockerfile:
-touch dockerfilehw
+cd ../..
+cd mnt/
+sudo mkdir JBrowse
+sudo wget https://github.com/GMOD/jbrowse-components/releases/download/v2.3.2/jbrowse-web-v2.3.2.zip
+sudo apt-get install unzip
+sudo unzip jbrowse-web-v2.3.2.zip 
+sudo rm jbrowse-web-v2.3.2.zip
 
-Создаем образ:
-sudo docker build -t dockerfilehw .
+* [0.25] Install nginx and amend its config(/etc/nginx/nginx.conf) to contain the following section:
 
-Запускаем образ:
-sudo docker run --rm -it dockerfilehw:latest bash
+# Устанавливаем
+sudo apt install nginx
 
-#нужно запустить . /.bashrc, чтобы все корректно работало
+# Меняем конфиг
+sudo nano /etc/nginx/nginx.conf 
 
-* [1] Use [hadolint](https://hadolint.github.io/hadolint/) and remove as many reported warnings as possible.
+```conf
+http {
+  # Don't touch other options!
+  # ........
+  # ........
 
-Не так много внесено исправлений. Добавлено --no-install-recommends, 
-заменил в конце *zip на ./*zip
+  # Comment this line(!):
+  # include /etc/nginx/sites-enabled/*;
 
-* [0.5] Add relevant [labels](https://docs.docker.com/engine/reference/builder/#label), e.g. maintainer, version, etc. ([hint](https://medium.com/@chamilad/lets-make-your-docker-image-better-than-90-of-existing-ones-8b1e5de950d))
+  # Add this:
+  server {
+    listen 80 default_server;
+    index index.html;
+    server_name _;
 
-Added version and description labels.
-
-#Final dockerfile
-
-```
-FROM ubuntu:22.04
-LABEL author=alexei_kotov
-LABEL version="1.0.0"
-LABEL description="my homework1"
-# устанавливаем все, что необходимо для конфигурации пакетов
-RUN apt-get update \
-&& apt-get -y --no-install-recommends install wget \
-&& apt-get -y --no-install-recommends install unzip \
-&& apt-get -y --no-install-recommends install perl \
-&& apt-get -y --no-install-recommends install openjdk-11-jdk xvfb \
-&& apt-get -y --no-install-recommends install python3-pip \
-&& apt-get -y --no-install-recommends install libgomp1 \
-&& apt-get -y --no-install-recommends install libtbb12 \
-&& touch /.bashrc
-
-# устанавливаем пакеты:
-# FastQC==0.11.9
-RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip \
-&& unzip fastqc_v0.11.9.zip \
-&& chmod a+x /FastQC/fastqc \
-&& echo 'alias fastqc="/FastQC/fastqc"' >> /.bashrc
-
-# STAR==2.7.10b
-RUN wget https://github.com/alexdobin/STAR/releases/download/2.7.10b/STAR_2.7.10b.zip \
-&& unzip ./STAR_2.7.10b.zip \
-&& chmod a+x ./STAR_2.7.10b/Linux_x86_64_static/STAR \
-&& mv ./STAR_2.7.10b/Linux_x86_64_static/STAR /bin/STAR \
-&& rm -r ./STAR_2.7.10b
-
-# samtools==1.16.1
-RUN wget https://github.com/samtools/samtools/archive/refs/tags/1.16.1.zip -O ./samtools-1.16.1.zip \
-&& unzip ./samtools-1.16.1.zip \
-&& mv ./samtools-1.16.1/misc /samtools\
-&& rm -r ./samtools-1.16.1 \
-&& echo 'alias samtools="/samtools/samtools.pl"' >> /.bashrc
-
-# picard==2.27.5
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.27.5/picard.jar -O /bin/picard.jar \
-&& chmod a+x /bin/picard.jar \
-&& echo 'alias picard="java -jar /bin/picard.jar"' >> /.bashrc
-
-# bedtools==2.30.0
-RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.30.0/bedtools.static.binary -O /bin/bedtools.static.binary \
-&& chmod a+x /bin/bedtools.static.binary\
-&& echo 'alias bedtools="/bin/bedtools.static.binary"' >> /.bashrc
-
-# MultiQC==1.13
-RUN pip install multiqc==1.13
-
-# salmon==1.9.0
-RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.9.0/salmon-1.9.0_linux_x86_64.tar.gz \
-&& tar -zxvf ./salmon-1.9.0_linux_x86_64.tar.gz \
-&& chmod a+x ./salmon-1.9.0_linux_x86_64/bin/salmon \
-&& mv ./salmon-1.9.0_linux_x86_64/bin/salmon /bin/salmon \
-&& rm -r ./salmon-1.9.0_linux_x86_64 
-
-# Удаляем исходники
-RUN rm ./*zip \
-&& rm ./*tar.gz
-
-# Чистим ненужные пакеты
-RUN apt-get autoremove \
-&& apt-get clean
+    # Don't put JBrowse inside the home directory!
+    # You will have problems with permissions
+    location /jbrowse/ {
+      alias /mnt/JBrowse/;	
+    }
+  }
+}
 ```
 
-## Extra points [1.5]
+* [0.25] Restart the nginx (reload its config) and make sure that you can access the browser using a link like this: `http://64.129.58.13/jbrowse/`. Here `64.129.58.13` is your public IP address.
 
-* [0.75] Minimizing the size of the final Docker image. That is, removing all intermediates, unnecessary binaries/caches, etc. Don't forget to compare & report the final size before and after all the optimizations.
+# Перезапускаем 
+sudo nginx -s reload
 
-Минимальизацию размера финального образа докер производил с самого первого шага создания.
-1. удалял в процессе все загружаемые архивы zip и tar
-2. Использовал --no-install-recommends с подсказки hadolint 
-3. В конце установки выполнил autoremove и clean, правда это не сильно уменьшило размер
+Проверяем ссылку, все работает.
 
-В результате изначальный размер докера, который у меня получился был более 2,5 гб. После оптимизации удалось уменьшить до 2 гб
+* [1] Add your files (BED & FASTA & GFF3) to the genome browser and verify that everything works as intended. Don't forget to [index](https://jbrowse.org/jb2/docs/cli/#jbrowse-text-index) the genome annotation, so you could later search by gene names.
+
+# Загружаем файлы в браузер
+
+sudo jbrowse add-assembly Homo_sapiens.GRCh38.dna.primary_assembly.fa --load copy --out /mnt/JBrowse/
+sudo jbrowse add-track Homo_sapiens.GRCh38.108.sorted.gff3.gz --out /mnt/JBrowse/
+sudo jbrowse add-track MLX_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
+sudo jbrowse add-track SMAD3_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
+sudo jbrowse add-track TGIF2_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
+
+Ссылка на браузер
+http://130.193.43.200/jbrowse/?session=share-iWIhhsqrm7&password=yQmjR
+
+
+**Remember to put a [persistent link](https://jbrowse.org/jb2/docs/user_guides/basic_usage/#sharing-sessions) to a JBrowse 2 session with all your BED files and the genome annotation in the report (like [this](https://jbrowse.org/code/jb2/v2.3.1/?session=share-HShsEcnq3i&password=nYzTU)). I must be able to access it without problems.**
