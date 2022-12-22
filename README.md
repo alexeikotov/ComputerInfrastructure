@@ -62,15 +62,15 @@ tabix -p gff Homo_sapiens.GRCh38.108.sorted.gff3.gz
 
 * [1] Select and download BED files for three ChIP-seq and one ATAC-seq experiment from the ENCODE (use one tissue/cell line). Sort, bgzip, and index them using tabix.
 
-#Брал в качестве линии K562
-#bigBed narrowPeak for CHIP-seq SMAD3 in K562
-wget -O SMAD3.bed.gz "https://www.encodeproject.org/files/ENCFF335ZTU/@@download/ENCFF335ZTU.bed.gz"
-#bigBed narrowPeak for CHIP-seq MLX in K562
-wget -O MLX.bed.gz "https://www.encodeproject.org/files/ENCFF682SSQ/@@download/ENCFF682SSQ.bed.gz"
-#bigBed narrowPeak for CHIP-seq TGIF2 in K562
-wget -O TGIF2.bed.gz "https://www.encodeproject.org/files/ENCFF336YLK/@@download/ENCFF336YLK.bed.gz"
-#bigBed narrowPeak for CHIP-seq ATACseq in K562
-wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz"
+#Брал в качестве линии K562\
+#bigBed narrowPeak for CHIP-seq SMAD3 in K562\
+wget -O SMAD3.bed.gz "https://www.encodeproject.org/files/ENCFF335ZTU/@@download/ENCFF335ZTU.bed.gz"\
+#bigBed narrowPeak for CHIP-seq MLX in K562\
+wget -O MLX.bed.gz "https://www.encodeproject.org/files/ENCFF682SSQ/@@download/ENCFF682SSQ.bed.gz"\
+#bigBed narrowPeak for CHIP-seq TGIF2 in K562\
+wget -O TGIF2.bed.gz "https://www.encodeproject.org/files/ENCFF336YLK/@@download/ENCFF336YLK.bed.gz"\
+#bigBed narrowPeak for CHIP-seq ATACseq in K562\
+wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz"\
 
 #Распаковываем и сортируем
 gzip -d *bed.gz
