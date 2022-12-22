@@ -70,37 +70,37 @@ wget -O MLX.bed.gz "https://www.encodeproject.org/files/ENCFF682SSQ/@@download/E
 #bigBed narrowPeak for CHIP-seq TGIF2 in K562\
 wget -O TGIF2.bed.gz "https://www.encodeproject.org/files/ENCFF336YLK/@@download/ENCFF336YLK.bed.gz" \
 #bigBed narrowPeak for CHIP-seq ATACseq in K562\
-wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz" \
+wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz" 
 
-#Распаковываем и сортируем
-gzip -d *bed.gz
+#Распаковываем и сортируем\
+gzip -d *bed.\
 for i in *.bed; do sort -k 1,1 -k2,2n $i > $(echo $i| cut -d '.' -f 1)'_sorted.bed'; done
 
-#впоследствии обнаружил, что названия хромосом в gff и bed отличаются, поэтому переименовал в bed хромосомы (например, из chr10 в 10)
-#иначе они не будут отображаться в браузере
+#впоследствии обнаружил, что названия хромосом в gff и bed отличаются, поэтому переименовал в bed хромосомы (например, из chr10 в 10)\
+#иначе они не будут отображаться в браузере\
 for i in *.sorted.bed; do awk '{gsub(/^chr/,""); print}' $i > $(echo $i| cut -d '.' -f 1)'_renamed.bed'; done
 
-#затем запаковал и индексировал
-for i in *sorted_renamed.bed; do bgzip -c $i > $i'.gz'; done
+#затем запаковал и индексировал\
+for i in *sorted_renamed.bed; do bgzip -c $i > $i'.gz'; done\
 for i in *sorted_renamed.bed.gz; do tabix -p bed $i; done
 
 **JBrowse 2**
 * [1] Download and install [JBrowse 2](https://jbrowse.org/jb2/). Create a new jbrowse [repository](https://jbrowse.org/jb2/docs/cli/#jbrowse-create-localpath) in `/mnt/JBrowse/` (or some other folder).
 
-cd ../..
-cd mnt/
-sudo mkdir JBrowse
-sudo wget https://github.com/GMOD/jbrowse-components/releases/download/v2.3.2/jbrowse-web-v2.3.2.zip
-sudo apt-get install unzip
-sudo unzip jbrowse-web-v2.3.2.zip 
+cd ../..\
+cd mnt/\
+sudo mkdir JBrowse\
+sudo wget https://github.com/GMOD/jbrowse-components/releases/download/v2.3.2/jbrowse-web-v2.3.2.zip\
+sudo apt-get install unzip\
+sudo unzip jbrowse-web-v2.3.2.zip\
 sudo rm jbrowse-web-v2.3.2.zip
 
 * [0.25] Install nginx and amend its config(/etc/nginx/nginx.conf) to contain the following section:
 
-#Устанавливаем
+#Устанавливаем\
 sudo apt install nginx
 
-#Меняем конфиг
+#Меняем конфиг\
 sudo nano /etc/nginx/nginx.conf 
 
 ```conf
@@ -129,7 +129,7 @@ http {
 
 * [0.25] Restart the nginx (reload its config) and make sure that you can access the browser using a link like this: `http://64.129.58.13/jbrowse/`. Here `64.129.58.13` is your public IP address.
 
-#Перезапускаем 
+#Перезапускаем\
 sudo nginx -s reload
 
 Проверяем ссылку, все работает.
@@ -138,13 +138,13 @@ sudo nginx -s reload
 
 #Загружаем файлы в браузер
 
-sudo jbrowse add-assembly Homo_sapiens.GRCh38.dna.primary_assembly.fa --load copy --out /mnt/JBrowse/
-sudo jbrowse add-track Homo_sapiens.GRCh38.108.sorted.gff3.gz --out /mnt/JBrowse/
-sudo jbrowse add-track MLX_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
-sudo jbrowse add-track SMAD3_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
+sudo jbrowse add-assembly Homo_sapiens.GRCh38.dna.primary_assembly.fa --load copy --out /mnt/JBrowse/\
+sudo jbrowse add-track Homo_sapiens.GRCh38.108.sorted.gff3.gz --out /mnt/JBrowse/\
+sudo jbrowse add-track MLX_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/\
+sudo jbrowse add-track SMAD3_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/\
 sudo jbrowse add-track TGIF2_sorted_renamed.bed.gz --load copy --out /mnt/JBrowse/
 
-Ссылка на браузер
+Ссылка на браузер\
 http://130.193.43.200/jbrowse/?session=share-iWIhhsqrm7&password=yQmjR
 
 
