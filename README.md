@@ -42,21 +42,21 @@ kotov_alexei@hw2machine\
 
 * [1] Download the latest human genome assembly (GRCh38) from the Ensemble FTP server ([fasta](https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz), [GFF3](https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz)). Index the fasta using samtools (`samtools faidx`) and GFF3 using tabix. 
 
-#Загружаем геном
+#Загружаем геном\
 wget https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
-#Загружаем аннотацию
+#Загружаем аннотацию\
 wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
 
-#Индексируем геном
-sudo apt-get install samtools
-gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+#Индексируем геном\
+sudo apt-get install samtools\
+gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz\
 samtools faidx Homo_sapiens.GRCh38.dna.primary_assembly.fa
 
-#Индексируем аннотацию
-sudo apt-get install tabix
-gzip -d Homo_sapiens.GRCh38.108.gff3.gz
-(grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > Homo_sapiens.GRCh38.108.sorted.gff3.gz
+#Индексируем аннотацию\
+sudo apt-get install tabix\
+gzip -d Homo_sapiens.GRCh38.108.gff3.gz\
+(grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > Homo_sapiens.GRCh38.108.sorted.gff3.gz\
 tabix -p gff Homo_sapiens.GRCh38.108.sorted.gff3.gz
 
 
