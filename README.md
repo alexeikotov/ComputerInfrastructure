@@ -37,30 +37,23 @@ Imagine wrapping up a large bioinformatics project and wanting to share raw data
 * [2] Create a new virtual machine in the Yandex/Mail/etc cloud (order at least 10GB of free disk space). Generate SSH key pair and use it to connect to your server.
 
 Создал виртуальную машину
-kotov_alexei@hw2machine:~$ df -h
-Filesystem      Size  Used Avail Use% Mounted on
-tmpfs           393M  1.2M  392M   1% /run
-/dev/vda2        15G  3.1G   11G  22% /
-tmpfs           2.0G     0  2.0G   0% /dev/shm
-tmpfs           5.0M     0  5.0M   0% /run/lock
-tmpfs           393M  4.0K  393M   1% /run/user/1000
-
+kotov_alexei@hw2machine
 Адрес: 130.193.43.200
 
 * [1] Download the latest human genome assembly (GRCh38) from the Ensemble FTP server ([fasta](https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz), [GFF3](https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz)). Index the fasta using samtools (`samtools faidx`) and GFF3 using tabix. 
 
-# Загружаем геном
+#Загружаем геном
 wget https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
-# Загружаем аннотацию
+#Загружаем аннотацию
 wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
 
-# Индексируем геном
+#Индексируем геном
 sudo apt-get install samtools
 gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 samtools faidx Homo_sapiens.GRCh38.dna.primary_assembly.fa
 
-# Индексируем аннотацию
+#Индексируем аннотацию
 sudo apt-get install tabix
 gzip -d Homo_sapiens.GRCh38.108.gff3.gz
 (grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > Homo_sapiens.GRCh38.108.sorted.gff3.gz
@@ -79,15 +72,15 @@ wget -O TGIF2.bed.gz "https://www.encodeproject.org/files/ENCFF336YLK/@@download
 #bigBed narrowPeak for CHIP-seq ATACseq in K562
 wget -O ATAC.bed.gz "https://www.encodeproject.org/files/ENCFF223QDM/@@download/ENCFF223QDM.bed.gz"
 
-# Распаковываем и сортируем
+#Распаковываем и сортируем
 gzip -d *bed.gz
 for i in *.bed; do sort -k 1,1 -k2,2n $i > $(echo $i| cut -d '.' -f 1)'_sorted.bed'; done
 
-# впоследствии обнаружил, что названия хромосом в gff и bed отличаются, поэтому переименовал в bed хромосомы (например, из chr10 в 10)
-# иначе они не будут отображаться в браузере
+#впоследствии обнаружил, что названия хромосом в gff и bed отличаются, поэтому переименовал в bed хромосомы (например, из chr10 в 10)
+#иначе они не будут отображаться в браузере
 for i in *.sorted.bed; do awk '{gsub(/^chr/,""); print}' $i > $(echo $i| cut -d '.' -f 1)'_renamed.bed'; done
 
-# затем запаковал и индексировал
+#затем запаковал и индексировал
 for i in *sorted_renamed.bed; do bgzip -c $i > $i'.gz'; done
 for i in *sorted_renamed.bed.gz; do tabix -p bed $i; done
 
@@ -104,10 +97,10 @@ sudo rm jbrowse-web-v2.3.2.zip
 
 * [0.25] Install nginx and amend its config(/etc/nginx/nginx.conf) to contain the following section:
 
-# Устанавливаем
+#Устанавливаем
 sudo apt install nginx
 
-# Меняем конфиг
+#Меняем конфиг
 sudo nano /etc/nginx/nginx.conf 
 
 ```conf
@@ -136,14 +129,14 @@ http {
 
 * [0.25] Restart the nginx (reload its config) and make sure that you can access the browser using a link like this: `http://64.129.58.13/jbrowse/`. Here `64.129.58.13` is your public IP address.
 
-# Перезапускаем 
+#Перезапускаем 
 sudo nginx -s reload
 
 Проверяем ссылку, все работает.
 
 * [1] Add your files (BED & FASTA & GFF3) to the genome browser and verify that everything works as intended. Don't forget to [index](https://jbrowse.org/jb2/docs/cli/#jbrowse-text-index) the genome annotation, so you could later search by gene names.
 
-# Загружаем файлы в браузер
+#Загружаем файлы в браузер
 
 sudo jbrowse add-assembly Homo_sapiens.GRCh38.dna.primary_assembly.fa --load copy --out /mnt/JBrowse/
 sudo jbrowse add-track Homo_sapiens.GRCh38.108.sorted.gff3.gz --out /mnt/JBrowse/
